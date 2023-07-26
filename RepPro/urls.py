@@ -28,7 +28,6 @@ urlpatterns = [
     path('signup/tutor/', UserViewSet.as_view({'post': 'create'}), name='tutor_signup'),
     path('signin/tutor/', CustomTokenObtainPairView.as_view(), name='tutor_signin'),
     
-
     path('tutors/', TutorsListView.as_view(), name='tutors_list'),
     path('update_profile/<int:pk>/', UpdateProfileView.as_view(), name='update_profile'),
     path('tutor/<int:pk>/',UserProfileView.as_view(), name='tutor_detail_page'),
@@ -41,5 +40,3 @@ urlpatterns = [
 
 ]
 
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -32,6 +32,7 @@ class ClientUserManager(BaseUserManager):
 
         return self.create_user(email, password, **extra_fields)
 
+
 class TutorUserManager(BaseUserManager):
     def create_user(self, email, password, **extra_fields):
         if not email:
@@ -53,15 +54,16 @@ class TutorUserManager(BaseUserManager):
             raise ValueError('Superuser must have is_superuser = True')
 
         return self.create_user(email,password,**extra_fields)
+    
 
 class TutorUser(AbstractBaseUser, PermissionsMixin):
     EXPERIENCE_CHOICES = (
-            ('<1', 'Менее 1 года'),
-            ('1', 'Более 1 года'),
-            ('2', 'Более 2 лет'),
-            ('3', 'Более 3 лет'),
-            ('5', 'Более 5 лет'),
-            ('10', 'Более 10 лет'),
+            (0, 'Менее 1 года'),
+            (1, 'Более 1 года'),
+            (2, 'Более 2 лет'),
+            (3, 'Более 3 лет'),
+            (5, 'Более 5 лет'),
+            (10, 'Более 10 лет'),
     )
 
     SALARY_CHOICES = (
@@ -88,10 +90,10 @@ class TutorUser(AbstractBaseUser, PermissionsMixin):
 
     def positive_validator(value):
         if value <= 0:
-            raise ValidationError("Age must be a positive number.")
+            raise ValidationError("Field must be a positive number.")
 
 
-    email = models.EmailField(max_length=255, unique=True)
+    email = models.EmailField('Email',max_length=255, unique=True)
     password = models.CharField(max_length=128, null=True)
     first_name = models.CharField(max_length=255, blank=False, null=False)
     last_name = models.CharField(max_length=255, blank=False, null=False)
@@ -103,26 +105,23 @@ class TutorUser(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     bio = models.TextField(max_length=2000, blank=True, null=True)
     date_of_birth = models.DateField(null=True, blank=True)
-    experience = models.CharField(max_length=20, null=True, blank=True,choices=EXPERIENCE_CHOICES)
+    experience = models.IntegerField(max_length=20, null=True, blank=True,choices=EXPERIENCE_CHOICES)
     education = models.CharField(max_length=255, null=True, blank=True)
     degree = models.CharField(max_length=255,null=True,blank=True,choices=DEGREE_CHOICES)
-    yof = models.IntegerField(blank=True, null=True,validators=[positive_validator])
-    avatar = models.ImageField(upload_to='media\\avatars/%Y/%m/%d', null=True, blank=True)
+    yof = models.IntegerField(blank=True, null=True,validators=[positive_validator],verbose_name='Год окончания')
+    avatar = models.ImageField(upload_to='media\\avatars/%Y/%m/%d', null=True, blank=True,default='media/avatars/default_avatar.png')
     files = models.FileField(upload_to='fmedia\\files/%Y/%m/%d',verbose_name='Сертификат',null=True, blank=True)
     salary = models.IntegerField( max_length=200,null=True, blank=True, choices=SALARY_CHOICES,verbose_name='Примерная ставка за час')
     link = models.URLField(blank=True, null=True, verbose_name='Ссылка на видео презентацию')
     activate_post = models.BooleanField(default=False)
 
-
-
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['first_name', 'last_name' ,'phone_number']
     objects = TutorUserManager()
 
+
     def __str__(self):
         return f'{self.first_name} {self.last_name}'
-
-
 
 
 class ClientUser(AbstractBaseUser, PermissionsMixin):
@@ -152,6 +151,7 @@ class ClientUser(AbstractBaseUser, PermissionsMixin):
         ),
         related_name='client_users'
     )
+
     user_permissions = models.ManyToManyField(
         Permission,
         verbose_name=('user permissions'),
@@ -164,6 +164,8 @@ class ClientUser(AbstractBaseUser, PermissionsMixin):
         return f"{self.first_name} {self.last_name}"
     def __str__(self):
         return f'{self.first_name} {self.last_name}'
+    
+
 class Review(models.Model):
     tutor = models.ForeignKey(TutorUser,on_delete=models.CASCADE,related_name = 'reviews')
     client = models.ForeignKey(ClientUser,on_delete=models.CASCADE,related_name='reviewer',default=None)

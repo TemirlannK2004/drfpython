@@ -21,14 +21,15 @@ from .service import TutorFilter
 
 
 class ReviewCreateView(generics.CreateAPIView):
+    """ Create Review for a Tutor """
     queryset = Review.objects.all()
     serializer_class = ReviewCreateSerializer
-
     def post(self, request, *args, **kwargs):
         response = super().post(request, *args, **kwargs)
         return Response(response.data, status=201)
 
 class TutorsListView(generics.ListAPIView):
+    """Display All Active Tutors with filter by salary,degree and experience """
     queryset = TutorUser.objects.all()
     serializer_class = TutorListSerializer
     filter_backends = (DjangoFilterBackend,)
@@ -37,16 +38,16 @@ class TutorsListView(generics.ListAPIView):
         return TutorUser.objects.filter(activate_post=True)
 
 class UserProfileView(generics.RetrieveAPIView):
+    """ Display Tutor Profile for Client """
     queryset = TutorUser.objects.all()
     serializer_class = TutorUserProfile
     lookup_field = 'pk'
 
 
 class UpdateProfileView(generics.RetrieveUpdateDestroyAPIView):
+    """Update Profile API"""
     queryset = TutorUser.objects.all()
     serializer_class = UpdateUserSerializer
-
-
 
 
 class CustomTokenObtainPairView(TokenObtainPairView):

@@ -19,13 +19,14 @@ class TutorUserCreateSerializer(UserCreateSerializer):
 
 
 class ReviewCreateSerializer(serializers.ModelSerializer):
+    """ Create Review for a Tutor """
     class Meta:
         model = Review
         fields = '__all__'
 
 class ReviewViewSerializer(serializers.ModelSerializer):
+    """ Display All Tutor Reviews """    
     client_name = serializers.CharField(source='client.get_full_name', read_only=True)
-
     class Meta:
         model = Review
         fields = ('client_name','description','rating','created_at')
@@ -33,15 +34,22 @@ class ReviewViewSerializer(serializers.ModelSerializer):
 
 
 class TutorUserProfile(serializers.ModelSerializer):
-    reviews= ReviewViewSerializer(many=True,read_only=True)
+    """ Display Tutor Profile for Client """
+    def get_average_rating(self, tutor):
+        reviews = tutor.reviews.all()
+        total_rating = sum(review.rating for review in reviews)
+        return round(total_rating / reviews.count(),2) if reviews.count() > 0 else 0.0
+    average_rating = serializers.SerializerMethodField('get_average_rating')
 
+    reviews = ReviewViewSerializer(many=True,read_only=True)
     class Meta:
         model = TutorUser
-        fields = ('first_name','last_name','email','phone_number','bio','avatar','files','date_of_birth','experience','education','degree','yof','salary','link','reviews')
+        fields = ('first_name','last_name','email','phone_number','bio','avatar','files','date_of_birth','experience','education','degree','yof','salary','link','average_rating','reviews')
 
 
 
 class UpdateUserSerializer(serializers.ModelSerializer):
+    """ Update Tutor Profile """
     tutor_user_model=get_user_model()
     def getEmail(self, tutor_user_model):
         return tutor_user_model.email
@@ -80,9 +88,16 @@ class UpdateUserSerializer(serializers.ModelSerializer):
 
 
 class TutorListSerializer(serializers.ModelSerializer):
+    """Display All Active Tutors """
+    def get_average_rating(self, tutor):
+        reviews = tutor.reviews.all()
+        total_rating = sum(review.rating for review in reviews)
+        return round(total_rating / reviews.count(),2) if reviews.count() > 0 else 0.0
+    average_rating = serializers.SerializerMethodField('get_average_rating')
+
     class Meta:
         model = TutorUser
-        fields = ('id','first_name','last_name','bio','salary','avatar')
+        fields = ('id','first_name','last_name','bio','salary','avatar','average_rating','experience')
 
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
