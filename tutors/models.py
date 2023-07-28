@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.contrib.auth.models import PermissionsMixin, AbstractUser, Group, Permission
@@ -9,6 +10,15 @@ from django.core.validators import RegexValidator
 from django.contrib.auth.models import BaseUserManager
 from multiselectfield import *
 from rest_framework.exceptions import ValidationError
+
+
+
+class Courses(models.Model):
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
+
 
 
 class ClientUserManager(BaseUserManager):
@@ -92,7 +102,7 @@ class TutorUser(AbstractBaseUser, PermissionsMixin):
         if value <= 0:
             raise ValidationError("Field must be a positive number.")
 
-
+    
     email = models.EmailField('Email',max_length=255, unique=True)
     password = models.CharField(max_length=128, null=True)
     first_name = models.CharField(max_length=255, blank=False, null=False)
@@ -115,31 +125,61 @@ class TutorUser(AbstractBaseUser, PermissionsMixin):
     link = models.URLField(blank=True, null=True, verbose_name='Ссылка на видео презентацию')
     activate_post = models.BooleanField(default=False)
 
+    courses = models.ManyToManyField(Courses)
+
+
+    
+
+
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['first_name', 'last_name' ,'phone_number']
     objects = TutorUserManager()
 
 
+    groups = models.ManyToManyField(
+        Group,
+        verbose_name=('groups'),
+        blank=True,
+        help_text=(
+            'The groups this user belongs to. A user will get all permissions '
+            'granted to each of their groups.'
+        ),
+        related_name='tutor_users'
+    )
+
+    user_permissions = models.ManyToManyField(
+        Permission,
+        verbose_name=('user permissions'),
+        blank=True,
+        help_text=('Specific permissions for this user.'),
+        related_name='titor_users'
+    )
+
+    def get_full_name(self):
+        return f"{self.courses}"
+
     def __str__(self):
         return f'{self.first_name} {self.last_name}'
 
 
+
+
 class ClientUser(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(max_length=255, unique=True)
-    password = models.CharField(max_length=128, null=True)
-    first_name = models.CharField(max_length=255)
-    last_name = models.CharField(max_length=255)
+    username = models.CharField(max_length=255, unique=True)
     avatar = models.URLField(blank=True, null=True)
-    age = models.IntegerField(blank=True, null=True)
+
+    age = models.IntegerField()
     gender = models.CharField(max_length=20)
     phone = models.CharField(max_length=15, unique=True)
-    is_staff = models.BooleanField(default=False)
-    is_superuser = models.BooleanField(default=False)
+    rating = models.FloatField(blank=True, null=True)
+
     is_active = models.BooleanField(default=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+    is_staff = models.BooleanField(default=False)
 
     objects = ClientUserManager()
-    USERNAME_FIELD = 'email'
+    USERNAME_FIELD = 'username'
+    REQUIRED_FIELDS = ['email']
 
     groups = models.ManyToManyField(
         Group,
@@ -161,9 +201,9 @@ class ClientUser(AbstractBaseUser, PermissionsMixin):
     )
 
     def get_full_name(self):
-        return f"{self.first_name} {self.last_name}"
+        return f"{self.username}"
     def __str__(self):
-        return f'{self.first_name} {self.last_name}'
+        return f'{self.email}'
     
 
 class Review(models.Model):
@@ -178,3 +218,6 @@ class Review(models.Model):
 
     def __str__(self):
         return f"Review by {self.client.get_full_name()} for Tutor {self.tutor}"
+
+
+

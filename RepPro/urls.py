@@ -2,13 +2,15 @@
 from django.contrib import admin
 from django.urls import path,include,re_path
 from django.contrib.auth import views as auth_views
+
 from djoser.views import TokenDestroyView
 from djoser import views
 from djoser.views import UserViewSet,TokenCreateView
 from django.conf.urls.static import static
 
-from rest_framework.routers import DefaultRouter
 from tutors.views import *
+
+from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,TokenVerifyView
@@ -32,6 +34,15 @@ urlpatterns = [
     path('update_profile/<int:pk>/', UpdateProfileView.as_view(), name='update_profile'),
     path('tutor/<int:pk>/',UserProfileView.as_view(), name='tutor_detail_page'),
     path('tutor/<int:pk>/review/', ReviewCreateView.as_view(), name='review_page'),
+
+
+    path('', AllUsersView.as_view()),
+    path('user/', UserView.as_view()),
+    path('register/', RegisterUserView.as_view()),
+    path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('logout/', LogoutView.as_view())
+
     # path('auth/tutors/', CustomTokenObtainPairView.as_view(), name='custom_token_obtain_pair'),
     # path('api/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
     # path('auth/token/destroy/', TokenDestroyView.as_view(), name='token-destroy'), 
