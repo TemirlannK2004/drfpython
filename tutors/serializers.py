@@ -7,6 +7,7 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from .models import *
 from RepPro import settings
 from djoser.serializers import UserCreateSerializer
+from django.forms import *
 
 
 
@@ -96,11 +97,11 @@ class UpdateUserSerializer(serializers.ModelSerializer):
     last_name = serializers.SerializerMethodField("getLastName")
     phone_num = serializers.SerializerMethodField("getPhone")
 
-    courses = serializers.PrimaryKeyRelatedField(queryset=Courses.objects.all(), many=True, write_only=True)
+    courses = serializers.PrimaryKeyRelatedField(queryset=Courses.objects.all(), many=True,write_only=True)
 
     class Meta:
         model = TutorUser
-        fields = ('email','first_name','last_name','phone_num','bio','date_of_birth','experience','education','degree','yof','courses','salary','link','activate_post')
+        fields = ('email','first_name','last_name','phone_num',"avatar",'bio','date_of_birth','experience','education','degree','yof','courses','salary','link','activate_post')
 
     def update(self, instance, validated_data):
 
@@ -115,7 +116,7 @@ class UpdateUserSerializer(serializers.ModelSerializer):
         if user.pk != instance.pk:
             raise serializers.ValidationError({"authorize": "You dont have permission for this user."})
         
-
+        instance.avatar = validated_data['avatar']
         instance.bio = validated_data['bio']
         instance.date_of_birth = validated_data['date_of_birth']
         instance.experience =validated_data['experience']

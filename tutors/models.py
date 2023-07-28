@@ -213,7 +213,7 @@ class Review(models.Model):
     tutor = models.ForeignKey(TutorUser,on_delete=models.CASCADE,related_name = 'reviews')
     client = models.ForeignKey(ClientUser,on_delete=models.CASCADE,related_name='reviewer',default=None)
     description = models.TextField(max_length=500,blank=True,null=True)
-    rating = models.PositiveIntegerField(blank=True,null=True  ,choices=((1,'1 star'), (2,'2 star'), (3,'3 star'), (4,'4 star'), (5,'5 star')))
+    rating = models.PositiveIntegerField(blank=True,null=True  ,verbose_name= "rating",choices=((1,'1 star'), (2,'2 star'), (3,'3 star'), (4,'4 star'), (5,'5 star')))
     created_at = models.DateTimeField(auto_now_add=True,blank=True,null=True)
 
     class Meta:

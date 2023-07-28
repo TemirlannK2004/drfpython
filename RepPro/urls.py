@@ -3,7 +3,6 @@ from django.contrib import admin
 from django.urls import path,include,re_path
 from django.contrib.auth import views as auth_views
 
-from djoser.views import TokenDestroyView
 from djoser import views
 from djoser.views import UserViewSet,TokenCreateView
 from django.conf.urls.static import static

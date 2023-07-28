@@ -7,8 +7,8 @@ class TutorFilter(filters.FilterSet):
     salary = filters.RangeFilter()
     experience = filters.RangeFilter()
     degree = filters.ChoiceFilter(choices=TutorUser.DEGREE_CHOICES)
-    rating = filters.NumberFilter(method='filter_by_rating')
-    course = filters.CharFilter(field_name='courses__name')
+    rating = filters.NumberFilter( method='filter_by_rating')
+    course = filters.CharFilter(field_name='courses')
 
     class Meta:
         model = TutorUser
