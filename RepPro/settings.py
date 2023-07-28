@@ -155,6 +155,12 @@ REST_FRAMEWORK = {
 AUTH_USER_MODEL = 'tutors.TutorUser'
 
 
+AUTHENTICATION_BACKENDS = [
+    'tutors.backends.MultiUserModelBackend',
+    'django.contrib.auth.backends.ModelBackend',  
+]
+
+
 DJOSER = {
     'LOGIN_FIELD':'email',
     'USER_CREATE_PASSWORD_RETYPE':True,
