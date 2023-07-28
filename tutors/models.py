@@ -16,6 +16,9 @@ from rest_framework.exceptions import ValidationError
 class Courses(models.Model):
     name = models.CharField(max_length=100)
 
+    def get_short_name(self):
+        return self.name
+
     def __str__(self):
         return self.name
 

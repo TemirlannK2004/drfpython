@@ -7,8 +7,7 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from .models import *
 from RepPro import settings
 from djoser.serializers import UserCreateSerializer
-from django.contrib.auth import get_user_model
-TutorUser  and ClientUser == get_user_model()
+
 
 
 class ClientUserProfileSerializer(serializers.ModelSerializer):
@@ -55,13 +54,14 @@ class CoursesSerializer(serializers.ModelSerializer):
 
 
 class TutorUserProfile(serializers.ModelSerializer):
-
     """ Display Tutor Profile for Client """
     def get_average_rating(self, tutor):
         reviews = tutor.reviews.all()
         total_rating = sum(review.rating for review in reviews)
         return round(total_rating / reviews.count(),2) if reviews.count() > 0 else 0.0
+    
     average_rating = serializers.SerializerMethodField('get_average_rating')
+
     reviews = ReviewViewSerializer(many=True,read_only=True)
 
     courses = serializers.SerializerMethodField()
@@ -78,7 +78,7 @@ class TutorUserProfile(serializers.ModelSerializer):
 
 class UpdateUserSerializer(serializers.ModelSerializer):
     """ Update Tutor Profile """
-    tutor_user_model=get_user_model()
+    tutor_user_model=TutorUser
     def getEmail(self, tutor_user_model):
         return tutor_user_model.email
     def getFirstName(self, tutor_user_model):
@@ -87,6 +87,8 @@ class UpdateUserSerializer(serializers.ModelSerializer):
         return tutor_user_model.last_name
     def getPhone(self, tutor_user_model):
         return tutor_user_model.phone_number
+    def getCourses(self, tutor_user_model):
+        return tutor_user_model.courses
     
 
     email = serializers.SerializerMethodField("getEmail")
@@ -94,22 +96,25 @@ class UpdateUserSerializer(serializers.ModelSerializer):
     last_name = serializers.SerializerMethodField("getLastName")
     phone_num = serializers.SerializerMethodField("getPhone")
 
-
+    courses = serializers.PrimaryKeyRelatedField(queryset=Courses.objects.all(), many=True, write_only=True)
 
     class Meta:
         model = TutorUser
         fields = ('email','first_name','last_name','phone_num','bio','date_of_birth','experience','education','degree','yof','courses','salary','link','activate_post')
 
     def update(self, instance, validated_data):
+
+        instance.courses.clear()
         courses_data = validated_data.pop('courses')
+        instance = super().update(instance, validated_data)
+        for course_data in courses_data:
+            instance.courses.add(course_data)
+
 
         user = self.context['request'].user
         if user.pk != instance.pk:
             raise serializers.ValidationError({"authorize": "You dont have permission for this user."})
         
-        for course_data in courses_data:
-            course = Courses.objects.get_or_create(title=course_data['course']['name'])[0]
-            TutorCourses.objects.get_or_create(tutor=instance, course=course)
 
         instance.bio = validated_data['bio']
         instance.date_of_birth = validated_data['date_of_birth']
@@ -122,14 +127,25 @@ class UpdateUserSerializer(serializers.ModelSerializer):
         instance.activate_post = validated_data['activate_post']
         instance.save()
         return instance
+    
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        courses = instance.courses.all()
+        course_names = [course.name for course in courses]
+        representation['courses'] = course_names
+        return representation
+    
 
 
 class TutorListSerializer(serializers.ModelSerializer):
-    courses = serializers.SerializerMethodField()
+    """Display All Active Tutors """
 
+
+    courses = serializers.SerializerMethodField()
     def get_courses(self, obj):
         return [course.name for course in obj.courses.all()]
-    """Display All Active Tutors """
+    
     def get_average_rating(self, tutor):
         reviews = tutor.reviews.all()
         total_rating = sum(review.rating for review in reviews)
