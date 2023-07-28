@@ -51,6 +51,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -226,6 +227,9 @@ CORS_ALLOW_ALL_ORIGINS=True
 CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOWED_ORIGINS = [
+    
+    'https://drfpython-jl5q0kdqw-icon91.vercel.app',
+    'https://drfpython-jl5q0kdqw-icon91.vercel.app',
     'http://localhost:3000',
     'http://localhost:8000',
     'http://192.168.1.104:3000',
@@ -251,6 +255,10 @@ CORS_ALLOW_HEADERS = (
     "x-requested-with",
 )
 CSRF_TRUSTED_ORIGINS=[
-    'http://localhost:3000'
+    'http://localhost:3000',
+    'https://drfpython-jl5q0kdqw-icon91.vercel.app',
+    'http://localhost:8000',
+
+
 ]
 

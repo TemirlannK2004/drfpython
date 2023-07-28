@@ -37,7 +37,7 @@ class ReviewCreateView(generics.CreateAPIView):
         return Response(response.data, status=201)
 
 class TutorsListView(generics.ListAPIView):
-    """Display All Active Tutors with filter by salary,degree and experience """
+    """Display All Active Tutors with filter by salary,experience,degree,average rating and courses """
     queryset = TutorUser.objects.all()
     serializer_class = TutorListSerializer
     permission_classes = [IsAuthenticatedOrReadOnly,]
