@@ -91,43 +91,67 @@ class UpdateUserSerializer(serializers.ModelSerializer):
     def getCourses(self, tutor_user_model):
         return tutor_user_model.courses
     
-
     email = serializers.SerializerMethodField("getEmail")
     first_name = serializers.SerializerMethodField("getFirstName")
     last_name = serializers.SerializerMethodField("getLastName")
     phone_num = serializers.SerializerMethodField("getPhone")
 
-    courses = serializers.PrimaryKeyRelatedField(queryset=Courses.objects.all(), many=True,write_only=True)
-
+    courses = serializers.SlugRelatedField(
+        queryset=Courses.objects.all(),
+        many=True,
+        slug_field='name',
+        required=False
+    )
     class Meta:
         model = TutorUser
-        fields = ('email','first_name','last_name','phone_num',"avatar",'bio','date_of_birth','experience','education','degree','yof','courses','salary','link','activate_post')
-
+        fields = ('email','first_name','last_name','phone_num',"avatar",'bio','date_of_birth','experience','education','degree','yof','courses','salary','files','link','activate_post')
+    
+    
     def update(self, instance, validated_data):
+        courses_data = validated_data.pop('courses', None)
+        for attr, value in validated_data.items():
+            if value is not None and getattr(instance, attr) != value:
+                setattr(instance, attr, value)
 
-        instance.courses.clear()
-        courses_data = validated_data.pop('courses')
-        instance = super().update(instance, validated_data)
-        for course_data in courses_data:
-            instance.courses.add(course_data)
+        if courses_data is not None:
+            instance.courses.clear()
+            for course_data in courses_data:
+                instance.courses.add(course_data)
+    
 
-
-        user = self.context['request'].user
-        if user.pk != instance.pk:
-            raise serializers.ValidationError({"authorize": "You dont have permission for this user."})
-        
-        instance.avatar = validated_data['avatar']
-        instance.bio = validated_data['bio']
-        instance.date_of_birth = validated_data['date_of_birth']
-        instance.experience =validated_data['experience']
-        instance.education= validated_data['education']
-        instance.degree = validated_data['degree']
-        instance.yof = validated_data['yof']
-        instance.salary = validated_data['salary']
-        instance.link = validated_data['link']
-        instance.activate_post = validated_data['activate_post']
         instance.save()
+    
         return instance
+
+
+       
+        
+        # instance.courses.clear()
+        # courses_data = validated_data.pop('courses')
+        # instance = super().update(instance, validated_data)
+        # for course_data in courses_data:
+        #     instance.courses.add(course_data)
+
+
+        # user = self.context['request'].user
+        # if user.pk != instance.pk:
+        #     raise serializers.ValidationError({"authorize": "You dont have permission for this user."})
+        
+        # instance.avatar = validated_data['avatar']
+        # instance.bio = validated_data['bio']
+        # instance.date_of_birth = validated_data['date_of_birth']
+        # instance.experience =validated_data['experience']
+        # instance.education= validated_data['education']
+        # instance.degree = validated_data['degree']
+        # instance.yof = validated_data['yof']
+        # instance.salary = validated_data['salary']
+        # instance.files = validated_data['files']
+
+        # instance.link = validated_data['link']
+        # instance.activate_post = validated_data['activate_post']
+        # instance.save()
+        # return instance
+   
     
 
     def to_representation(self, instance):
@@ -141,8 +165,6 @@ class UpdateUserSerializer(serializers.ModelSerializer):
 
 class TutorListSerializer(serializers.ModelSerializer):
     """Display All Active Tutors """
-
-
     courses = serializers.SerializerMethodField()
     def get_courses(self, obj):
         return [course.name for course in obj.courses.all()]

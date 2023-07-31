@@ -1,6 +1,7 @@
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth import get_user_model
 from django.db.models import F
+from django.db.models.functions import Coalesce
 
 
 from django_filters.rest_framework import DjangoFilterBackend
@@ -10,7 +11,7 @@ from .serializers import *
 from .permissions import *
 from .service import TutorFilter
 
-
+from rest_framework.filters import SearchFilter,OrderingFilter
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -41,10 +42,14 @@ class TutorsListView(generics.ListAPIView):
     queryset = TutorUser.objects.all()
     serializer_class = TutorListSerializer
     permission_classes = [IsAuthenticatedOrReadOnly,]
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (DjangoFilterBackend,SearchFilter,OrderingFilter)
+    search_fields = ('id','first_name','tutorcourse__course__name','last_name','bio')
+    ordering_fields = ['salary','experience','reviews']
+
     filterset_class = TutorFilter
     def get_queryset(self):
-        return TutorUser.objects.filter(activate_post=True).annotate(average_rating=Avg('reviews__rating')).order_by('-average_rating')
+        return TutorUser.objects.filter(activate_post=True).annotate(average_rating=Coalesce(Avg('reviews__rating'),0.0)).order_by('-average_rating','pk')
+    
 
 class UserProfileView(generics.RetrieveAPIView):
     """ Display Tutor Profile for Client """
@@ -53,7 +58,6 @@ class UserProfileView(generics.RetrieveAPIView):
     permission_classes = [IsAuthenticatedOrReadOnly,]
     lookup_field = 'pk'
    
-
 
 class UpdateProfileView(generics.RetrieveUpdateDestroyAPIView):
     """Update Profile API"""

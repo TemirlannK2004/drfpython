@@ -11,10 +11,13 @@ from django.contrib.auth.models import BaseUserManager
 from multiselectfield import *
 from rest_framework.exceptions import ValidationError
 
+def validate_courses(value):
+    if value.count()==0:
+        raise ValidationError("At least one course must be selected.")
 
 
 class Courses(models.Model):
-    name = models.CharField(max_length=100)
+    name = models.CharField('Course name',max_length=100)
 
     def get_short_name(self):
         return self.name
@@ -100,6 +103,8 @@ class TutorUser(AbstractBaseUser, PermissionsMixin):
         ("phd",'Кандидат Наук'),
         ("pf",'Профессор')
     )
+   
+
 
     def positive_validator(value):
         if value <= 0:
@@ -128,11 +133,7 @@ class TutorUser(AbstractBaseUser, PermissionsMixin):
     link = models.URLField(blank=True, null=True, verbose_name='Ссылка на видео презентацию')
     activate_post = models.BooleanField(default=False)
 
-    courses = models.ManyToManyField(Courses)
-
-
-    
-
+    courses = models.ManyToManyField(Courses,through='TutorCourse',validators=[validate_courses])
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['first_name', 'last_name' ,'phone_number']
@@ -210,10 +211,17 @@ class ClientUser(AbstractBaseUser, PermissionsMixin):
     
 
 class Review(models.Model):
+    RATING_CHOICES=(
+        (1,'1 star' ),
+        (2,'2 stars' ),
+        (3,'3 stars' ),
+        (4,'4 stars' ),
+        (5,'5 stars' ),
+    )
     tutor = models.ForeignKey(TutorUser,on_delete=models.CASCADE,related_name = 'reviews')
     client = models.ForeignKey(ClientUser,on_delete=models.CASCADE,related_name='reviewer',default=None)
     description = models.TextField(max_length=500,blank=True,null=True)
-    rating = models.PositiveIntegerField(blank=True,null=True  ,verbose_name= "rating",choices=((1,'1 star'), (2,'2 star'), (3,'3 star'), (4,'4 star'), (5,'5 star')))
+    rating = models.PositiveIntegerField('Rating',blank=True,null=True ,choices=RATING_CHOICES)
     created_at = models.DateTimeField(auto_now_add=True,blank=True,null=True)
 
     class Meta:
@@ -223,4 +231,12 @@ class Review(models.Model):
         return f"Review by {self.client.get_full_name()} for Tutor {self.tutor}"
 
 
+
+
+class TutorCourse(models.Model):
+    tutor = models.ForeignKey(TutorUser, on_delete=models.CASCADE)
+    course = models.ForeignKey(Courses, on_delete=models.CASCADE,validators=[validate_courses])
+
+    def __str__(self):
+        return f'{self.tutor.first_name} - {self.course.name}'
 

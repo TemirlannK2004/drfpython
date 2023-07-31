@@ -42,14 +42,12 @@ urlpatterns = [
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('logout/', LogoutView.as_view())
 
-    # path('auth/tutors/', CustomTokenObtainPairView.as_view(), name='custom_token_obtain_pair'),
-    # path('api/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
-    # path('auth/token/destroy/', TokenDestroyView.as_view(), name='token-destroy'), 
-    # path('login/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    # path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+
 
 ]
 
 
                       
 urlpatterns += static(settings.STATIC_URL,document_root=settings.STATIC_ROOT)
+urlpatterns += static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)
+

@@ -14,6 +14,6 @@ admin.site.register(ClientUser)
 admin.site.register(Review)
 admin.site.register(Courses)
 
-# admin.site.register(TutorCourses)
+admin.site.register(TutorCourse)
 
 

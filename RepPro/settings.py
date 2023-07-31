@@ -86,13 +86,8 @@ WSGI_APPLICATION = 'RepPro.wsgi.application'
 
 DATABASES = {
     'default': {
-        #'ENGINE': 'django.db.backends.sqlite3',
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'railway',
-        'USER': 'postgres',
-        'PASSWORD': 'unMdy6GgW8aTaMLkJb7t',
-        'HOST': 'containers-us-west-74.railway.app',
-        'PORT': '6696',
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 
@@ -133,7 +128,9 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATICFILES_DIRS = os.path.join(BASE_DIR,'static'),
 STATIC_ROOT = os.path.join(BASE_DIR,'staticfiles_build','static')
-
+MEDIA_DIR = BASE_DIR / 'media'
+MEDIA_ROOT = MEDIA_DIR
+MEDIA_URL = '/media/'
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
@@ -229,12 +226,7 @@ CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
     
     'https://drfpython-jl5q0kdqw-icon91.vercel.app',
-    'https://drfpython-jl5q0kdqw-icon91.vercel.app',
     'http://localhost:3000',
-    'http://localhost:8000',
-    'http://192.168.1.104:3000',
-    'http://192.168.1.104:8000',
-    'http://127.0.0.1:8000',
     'http://127.0.0.1:3000',
 
 ]
@@ -258,7 +250,5 @@ CSRF_TRUSTED_ORIGINS=[
     'http://localhost:3000',
     'https://drfpython-jl5q0kdqw-icon91.vercel.app',
     'http://localhost:8000',
-
-
 ]
 
