@@ -226,8 +226,8 @@ class Review(models.Model):
     )
     tutor = models.ForeignKey(TutorUser,on_delete=models.CASCADE,related_name = 'reviews')
     client = models.ForeignKey(ClientUser,on_delete=models.CASCADE,related_name='reviewer',default=None)
-    description = models.TextField(max_length=500)
-    rating = models.PositiveIntegerField('Rating',choices=RATING_CHOICES)
+    description = models.TextField(max_length=500,null=True)
+    rating = models.PositiveIntegerField('Rating',choices=RATING_CHOICES,null=True)
     created_at = models.DateTimeField(auto_now_add=True,blank=True,null=True)
 
     class Meta:
