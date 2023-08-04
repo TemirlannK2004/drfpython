@@ -86,7 +86,6 @@ class TutorsListView(generics.ListAPIView):
     search_fields = ('id','first_name','tutorcourse__course__name','last_name','bio')
     ordering_fields = ['salary','experience']
     
-
     filterset_class = TutorFilter
     def get_queryset(self):
         return TutorUser.objects.filter(activate_post=True).annotate(average_rating=Coalesce(Avg('reviews__rating'),0.0)).order_by('-average_rating','pk')
@@ -111,8 +110,6 @@ class UpdateProfileView(generics.RetrieveUpdateDestroyAPIView):
 class CustomTokenObtainPairView(TokenObtainPairView):
     """Custom URL for SignIn Tutor JWT"""
     serializer_class = CustomTokenObtainPairSerializer
-
-
 
 
 

@@ -126,12 +126,8 @@ class UpdateUserSerializer(serializers.ModelSerializer):
         for attr, value in validated_data.items():
             if value is not None and getattr(instance, attr) != value:
                 setattr(instance, attr, value)
-
         if courses_data is not None:
-            instance.courses.clear()
-            for course_data in courses_data:
-                instance.courses.add(course_data)
-    
+            instance.courses.set(courses_data)
         instance.save()
         return instance
 
