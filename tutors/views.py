@@ -1,30 +1,69 @@
-from django.shortcuts import render, get_object_or_404
-from django.contrib.auth import get_user_model
-from django.db.models import F
+
 from django.db.models.functions import Coalesce
 
-
 from django_filters.rest_framework import DjangoFilterBackend
+import requests
 
 from .models import *
 from .serializers import *
 from .permissions import *
 from .service import TutorFilter
 
+from rest_framework.response import Response
+
 from rest_framework.filters import SearchFilter,OrderingFilter
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import AllowAny, IsAuthenticated,IsAdminUser,IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticated,IsAuthenticatedOrReadOnly
 from rest_framework_simplejwt.views import TokenObtainPairView
-from rest_framework import permissions, status
+from rest_framework.status import *
 from rest_framework.parsers import JSONParser, MultiPartParser, FormParser
-from rest_framework import generics, viewsets, mixins
-from rest_framework.decorators import action
-from rest_framework.viewsets import GenericViewSet, ViewSet
+from rest_framework import generics
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 
+class TutorRequisitesView(APIView):
+    def get(self,request,tutor_id):
+        try:
+            tutor = TutorUser.objects.get(id = tutor_id)
+            serializer =TutorRequisitesSerializer(tutor)
+            return Response(serializer.data, status=status.HTTP_200_OK) 
+            # # response = requests.post('http://client_service/', data=serializer.data)
+            # if response.status_code == 200:
+            #     return Response({'message': 'Successfully.'}, status=status.HTTP_200_OK)
+        except TutorUser.DoesNotExist:
+            return Response({'error':'Tutor not found'},status=status.HTTP_404_NOT_FOUND)
+                
+class TutorRequestView(APIView):
+    def get(self, request, tutor_id):
+        tutor_requests = TutorRequest.objects.filter(tutor_id=tutor_id)
+        serializer = TutorRequestSerializer(tutor_requests, many=True)
+        return Response(serializer.data)
+    
+    def patch(self, request, tutor_id):
+        tutor_request_id = request.data.get('tutor_request_id')
+        
+        status_value = request.data.get('status')
+
+        allowed_statuses = [choice[0] for choice in TutorRequest.STATUS_CHOICES]
+        if status_value not in allowed_statuses:
+            return Response({'error': 'Invalid status value'}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            tutor_request = TutorRequest.objects.get(id=tutor_request_id, tutor_id=tutor_id)
+        except TutorRequest.DoesNotExist:
+            return Response({'error': 'Tutor request not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        tutor_request.status = status_value
+        tutor_request.save()
+
+        clients_api_url = 'http://clients-service:8000/api/'
+      
+        response = requests.post(clients_api_url, data=serializers.data)
+        if response.status_code == 200:
+            return Response({'message': 'Successfully'}, status=status.HTTP_200_OK)
+        else:
+            return Response({'error': 'Failed'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 
@@ -36,6 +75,7 @@ class ReviewCreateView(generics.CreateAPIView):
     def post(self, request, *args, **kwargs):
         response = super().post(request, *args, **kwargs)
         return Response(response.data, status=201)
+    
 
 class TutorsListView(generics.ListAPIView):
     """Display All Active Tutors with filter by salary,experience,degree,average rating and courses """
@@ -44,7 +84,8 @@ class TutorsListView(generics.ListAPIView):
     permission_classes = [IsAuthenticatedOrReadOnly,]
     filter_backends = (DjangoFilterBackend,SearchFilter,OrderingFilter)
     search_fields = ('id','first_name','tutorcourse__course__name','last_name','bio')
-    ordering_fields = ['salary','experience','reviews']
+    ordering_fields = ['salary','experience']
+    
 
     filterset_class = TutorFilter
     def get_queryset(self):
@@ -59,6 +100,7 @@ class UserProfileView(generics.RetrieveAPIView):
     lookup_field = 'pk'
    
 
+
 class UpdateProfileView(generics.RetrieveUpdateDestroyAPIView):
     """Update Profile API"""
     queryset = TutorUser.objects.all()
@@ -69,6 +111,8 @@ class UpdateProfileView(generics.RetrieveUpdateDestroyAPIView):
 class CustomTokenObtainPairView(TokenObtainPairView):
     """Custom URL for SignIn Tutor JWT"""
     serializer_class = CustomTokenObtainPairSerializer
+
+
 
 
 
@@ -125,53 +169,3 @@ class LogoutView(APIView):
             return Response(status=status.HTTP_205_RESET_CONTENT)
         except Exception as e:
             return Response(status=status.HTTP_400_BAD_REQUEST)
-
-
-
-# class LogoutView(APIView):
-#     permission_classes = (IsAuthenticated,)
-#     def post(self, request):
-#         try:
-#             refresh_token = request.data["refresh_token"]
-#             token = RefreshToken(refresh_token)
-#             token.blacklist()  
-#             return Response({"message": "Logout successful."}, status=200)
-#         except Exception as e:
-#             return Response({"error": "Invalid token."}, status=400)
-
-
-# class CustomTokenObtainPairView(TokenObtainPairView):
-#     serializer_class = MyTokenObtainPairSerializer
-#     permission_classes = [permissions.AllowAny]
-
-
-# class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
-#     @classmethod
-#     def get_token(cls, user):
-#         token = super(MyTokenObtainPairSerializer, cls).get_token(user)
-#         token['email'] = user.email
-#         token['first_name'] = user.first_name
-#         token['last_name'] = user.last_name
-#         return token
-
-# class CustomTokenObtainPairView(APIView):
-#     permission_classes = [AllowAny]
-
-#     def post(self, request, *args, **kwargs):
-#         serializer = MyTokenObtainPairSerializer(data=request.data)
-#         serializer.is_valid(raise_exception=True)
-#         user = serializer.user
-#         refresh = RefreshToken.for_user(user)
-#         token_data = {
-#             'refresh': str(refresh),
-#             'access': str(refresh.access_token),
-#         }
-#         return Response(token_data)
-
-# class CustomTokenObtainPairViewSet(ViewSet):
-#     permission_classes = [AllowAny]
-
-#     @action(detail=False, methods=['post'])
-#     def login(self, request):
-#         view = CustomTokenObtainPairView.as_view()
-#         return view(request._request)

@@ -39,13 +39,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'tutors',
+    'tutors.apps.TutorsConfig',
     'rest_framework',
     'djoser',
     'rest_framework_simplejwt',
     'corsheaders',
     'multiselectfield',
     'django_filters',
+    'drf_yasg',
 ]
 
 MIDDLEWARE = [
@@ -152,6 +153,8 @@ REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS':(
         'django_filters.rest_framework.DjangoFilterBackend',
     ),
+   
+
 }
 
 
@@ -162,7 +165,6 @@ AUTHENTICATION_BACKENDS = [
     'tutors.backends.MultiUserModelBackend',
     'django.contrib.auth.backends.ModelBackend',  
 ]
-
 
 DJOSER = {
     'LOGIN_FIELD':'email',
@@ -220,15 +222,14 @@ SIMPLE_JWT = {
 }
 
 
-CORS_ALLOW_ALL_ORIGINS=True
+CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOWED_ORIGINS = [
-    
-    'https://drfpython-jl5q0kdqw-icon91.vercel.app',
+    'https://drfpythonwww.vercel.app',
     'http://localhost:3000',
-    'http://127.0.0.1:3000',
 
+    
 ]
 CORS_ALLOW_METHODS = (
     "DELETE",
@@ -238,17 +239,15 @@ CORS_ALLOW_METHODS = (
     "POST",
     "PUT",
 )
-CORS_ALLOW_HEADERS = (
-    "accept",
-    "authorization",
-    "content-type",
-    "user-agent",
-    "x-csrftoken",
-    "x-requested-with",
-)
-CSRF_TRUSTED_ORIGINS=[
-    'http://localhost:3000',
-    'https://drfpython-jl5q0kdqw-icon91.vercel.app',
-    'http://localhost:8000',
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
 ]
-
+    

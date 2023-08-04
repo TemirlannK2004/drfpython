@@ -13,7 +13,7 @@ admin.site.register(TutorUser)
 admin.site.register(ClientUser)
 admin.site.register(Review)
 admin.site.register(Courses)
-
 admin.site.register(TutorCourse)
 
+admin.site.register(TutorRequest)
 

@@ -7,6 +7,8 @@ from djoser import views
 from djoser.views import UserViewSet,TokenCreateView
 from django.conf.urls.static import static
 
+
+
 from tutors.views import *
 
 from rest_framework.routers import DefaultRouter
@@ -19,6 +21,7 @@ router = DefaultRouter()
 
 
 urlpatterns = [
+   
     path('admin/', admin.site.urls),
     path('',include('tutors.urls')),
     path('', include(router.urls)),
@@ -33,6 +36,9 @@ urlpatterns = [
     path('tutor/<int:pk>/', UpdateProfileView.as_view(), name='update_profile'),
     path('tutors/<int:pk>/',UserProfileView.as_view(), name='tutor_detail_page'),
     path('tutor/<int:pk>/review/', ReviewCreateView.as_view(), name='review_page'),
+    path('tutor_requests/<int:tutor_id>/', TutorRequestView.as_view(), name='tutor_requests'),
+    path('tutors/<int:tutor_id>/requisites/', TutorRequisitesView.as_view(),name='tutor_requisites'),
+
 
 
     path('', AllUsersView.as_view()),
@@ -42,12 +48,10 @@ urlpatterns = [
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('logout/', LogoutView.as_view())
 
-
-
 ]
 
 
-                      
+
 urlpatterns += static(settings.STATIC_URL,document_root=settings.STATIC_ROOT)
 urlpatterns += static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)
 

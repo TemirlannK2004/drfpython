@@ -6,6 +6,8 @@ from django.contrib.auth.base_user import BaseUserManager, AbstractBaseUser
 from django.db.models import Avg
 from django.utils import timezone
 from django.core.validators import RegexValidator
+from datetime import time, timedelta
+
 
 from django.contrib.auth.models import BaseUserManager
 from multiselectfield import *
@@ -14,6 +16,9 @@ from rest_framework.exceptions import ValidationError
 def validate_courses(value):
     if value.count()==0:
         raise ValidationError("At least one course must be selected.")
+
+
+
 
 
 class Courses(models.Model):
@@ -112,28 +117,29 @@ class TutorUser(AbstractBaseUser, PermissionsMixin):
 
     
     email = models.EmailField('Email',max_length=255, unique=True)
-    password = models.CharField(max_length=128, null=True)
-    first_name = models.CharField(max_length=255, blank=False, null=False)
-    last_name = models.CharField(max_length=255, blank=False, null=False)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    phone_number = models.CharField( max_length=20, unique=True)
+    password = models.CharField('Password',max_length=128, null=True)
+    first_name = models.CharField('First Name',max_length=255, blank=False, null=False)
+    last_name = models.CharField('Last name',max_length=255, blank=False, null=False)
+    created_at = models.DateTimeField('Created at',auto_now_add=True)
+    updated_at = models.DateTimeField('Updated at',auto_now=True)
+    phone_number = models.CharField('Phone Num',max_length=20, unique=True)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
-    bio = models.TextField(max_length=2000, blank=True, null=True)
-    date_of_birth = models.DateField(null=True, blank=True)
-    experience = models.IntegerField(max_length=20, null=True, blank=True,choices=EXPERIENCE_CHOICES)
-    education = models.CharField(max_length=255, null=True, blank=True)
-    degree = models.CharField(max_length=255,null=True,blank=True,choices=DEGREE_CHOICES)
-    yof = models.IntegerField(blank=True, null=True,validators=[positive_validator],verbose_name='Год окончания')
-    avatar = models.ImageField(upload_to='media\\avatars/%Y/%m/%d', null=True, blank=True,default='media/avatars/default_avatar.png')
-    files = models.FileField(upload_to='fmedia\\files/%Y/%m/%d',verbose_name='Сертификат',null=True, blank=True)
-    salary = models.IntegerField( max_length=200,null=True, blank=True, choices=SALARY_CHOICES,verbose_name='Примерная ставка за час')
-    link = models.URLField(blank=True, null=True, verbose_name='Ссылка на видео презентацию')
-    activate_post = models.BooleanField(default=False)
+    bio = models.TextField('About Me',max_length=2000, blank=True, null=True)
+    date_of_birth = models.DateField('Date of Birth',null=True, blank=True)
+    experience = models.IntegerField('Experience',max_length=20, null=True, blank=True,choices=EXPERIENCE_CHOICES)
+    education = models.CharField('Education/University',max_length=255, null=True, blank=True)
+    degree = models.CharField('Academic Degree',max_length=255,null=True,blank=True,choices=DEGREE_CHOICES)
+    yof = models.IntegerField('Year of Ending ',blank=True, null=True,validators=[positive_validator])
+    avatar = models.ImageField('Profile Avatar',upload_to='media\\avatars/%Y/%m/%d', null=True, blank=True,default='media/avatars/default_avatar.png')
+    files = models.FileField('Files',upload_to='fmedia\\files/%Y/%m/%d',null=True, blank=True)
+    salary = models.IntegerField('Salary',max_length=200,null=True, blank=True, choices=SALARY_CHOICES)
+    link = models.URLField('Video Link',blank=True, null=True)
+    activate_post = models.BooleanField('Acticate Profile',default=False)
 
     courses = models.ManyToManyField(Courses,through='TutorCourse',validators=[validate_courses])
+
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['first_name', 'last_name' ,'phone_number']
@@ -220,8 +226,8 @@ class Review(models.Model):
     )
     tutor = models.ForeignKey(TutorUser,on_delete=models.CASCADE,related_name = 'reviews')
     client = models.ForeignKey(ClientUser,on_delete=models.CASCADE,related_name='reviewer',default=None)
-    description = models.TextField(max_length=500,blank=True,null=True)
-    rating = models.PositiveIntegerField('Rating',blank=True,null=True ,choices=RATING_CHOICES)
+    description = models.TextField(max_length=500)
+    rating = models.PositiveIntegerField('Rating',choices=RATING_CHOICES)
     created_at = models.DateTimeField(auto_now_add=True,blank=True,null=True)
 
     class Meta:
@@ -239,4 +245,26 @@ class TutorCourse(models.Model):
 
     def __str__(self):
         return f'{self.tutor.first_name} - {self.course.name}'
+
+
+
+class TutorRequest(models.Model):
+
+    STATUS_CHOICES = (
+        ('Accepted','Accept Request'),
+        ('Rejected','Reject Request'),
+        ('Pending','Pending'),
+    )
+  
+    tutor = models.ForeignKey(TutorUser, on_delete=models.CASCADE)
+    client = models.ForeignKey(ClientUser,on_delete=models.CASCADE,default=None)
+    status = models.CharField(max_length=50,choices=STATUS_CHOICES,default='Pending',blank=True,null=True)
+    date_time = models.DateTimeField(auto_now_add=True)
+    text = models.TextField(max_length=1000,blank=True,null=True)
+
+    def __str__(self):
+        return f'{self.client.pk} request for Tutor - {self.tutor.first_name} {self.tutor.last_name}'
+
+
+
 

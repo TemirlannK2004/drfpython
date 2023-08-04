@@ -1,13 +1,24 @@
-from django.db.models import Avg
 from rest_framework import serializers
-from django.contrib.auth.models import Group, Permission
-from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from .models import *
-from RepPro import settings
 from djoser.serializers import UserCreateSerializer
 from django.forms import *
+
+
+class TutorRequisitesSerializer(serializers.ModelSerializer):
+    """Tutor Requisites"""
+    class Meta:
+        model=TutorUser
+        fields = ('id','email','first_name','last_name','phone_number')
+
+
+class TutorRequestSerializer(serializers.ModelSerializer):
+    """Tutor Requests list for Accept/Reject"""
+    client = serializers.CharField(source = 'client.get_full_name')
+    class Meta:
+        model=TutorRequest
+        fields = ("id","client","status","text","date_time",)
 
 
 
@@ -21,11 +32,7 @@ class ClientUserProfileSerializer(serializers.ModelSerializer):
         return user
 
 
-
-
-
-
-
+    
 class TutorUserCreateSerializer(UserCreateSerializer):
     """ Tutor Sign Up using Djoser JWT """
     class Meta(UserCreateSerializer.Meta):
@@ -36,10 +43,22 @@ class TutorUserCreateSerializer(UserCreateSerializer):
 
 class ReviewCreateSerializer(serializers.ModelSerializer):
     """ Create Review for a Tutor """
-    tutor = serializers.HiddenField(default = serializers.CurrentUserDefault())
+    client = serializers.HiddenField(default = serializers.CurrentUserDefault())
+
     class Meta:
         model = Review
         fields = '__all__'
+
+    def get_default_tutor(self):
+        tutor_id = self.context.get('view').kwargs.get('tutor_id')
+        try:
+            return TutorUser.objects.get(id=tutor_id)
+        except TutorUser.DoesNotExist:
+            raise serializers.ValidationError("Tutor not found.")
+    def create(self, validated_data):
+        tutor = validated_data.pop('tutor')
+        review = Review.objects.create(tutor=tutor, **validated_data)
+        return review        
 
 class ReviewViewSerializer(serializers.ModelSerializer):
     """ Display All Tutor Reviews """    
@@ -60,21 +79,16 @@ class TutorUserProfile(serializers.ModelSerializer):
         reviews = tutor.reviews.all()
         total_rating = sum(review.rating for review in reviews)
         return round(total_rating / reviews.count(),2) if reviews.count() > 0 else 0.0
-    
+
     average_rating = serializers.SerializerMethodField('get_average_rating')
-
     reviews = ReviewViewSerializer(many=True,read_only=True)
-
     courses = serializers.SerializerMethodField()
 
     def get_courses(self, obj):
         return [course.name for course in obj.courses.all()]
-
-
     class Meta:
         model = TutorUser
         fields = ('first_name','last_name','email','phone_number','bio','avatar','files','date_of_birth','experience','education','degree','courses','yof','salary','link','average_rating','reviews')
-
 
 
 class UpdateUserSerializer(serializers.ModelSerializer):
@@ -118,41 +132,8 @@ class UpdateUserSerializer(serializers.ModelSerializer):
             for course_data in courses_data:
                 instance.courses.add(course_data)
     
-
         instance.save()
-    
         return instance
-
-
-       
-        
-        # instance.courses.clear()
-        # courses_data = validated_data.pop('courses')
-        # instance = super().update(instance, validated_data)
-        # for course_data in courses_data:
-        #     instance.courses.add(course_data)
-
-
-        # user = self.context['request'].user
-        # if user.pk != instance.pk:
-        #     raise serializers.ValidationError({"authorize": "You dont have permission for this user."})
-        
-        # instance.avatar = validated_data['avatar']
-        # instance.bio = validated_data['bio']
-        # instance.date_of_birth = validated_data['date_of_birth']
-        # instance.experience =validated_data['experience']
-        # instance.education= validated_data['education']
-        # instance.degree = validated_data['degree']
-        # instance.yof = validated_data['yof']
-        # instance.salary = validated_data['salary']
-        # instance.files = validated_data['files']
-
-        # instance.link = validated_data['link']
-        # instance.activate_post = validated_data['activate_post']
-        # instance.save()
-        # return instance
-   
-    
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
@@ -168,7 +149,6 @@ class TutorListSerializer(serializers.ModelSerializer):
     courses = serializers.SerializerMethodField()
     def get_courses(self, obj):
         return [course.name for course in obj.courses.all()]
-    
     def get_average_rating(self, tutor):
         reviews = tutor.reviews.all()
         total_rating = sum(review.rating for review in reviews)
@@ -184,4 +164,4 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     """ Custom URL for SignIn Tutor JWT """
     def validate(self, attrs):
         data = super().validate(attrs)
-        return data
+        return data     
