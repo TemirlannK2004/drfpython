@@ -138,7 +138,6 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.BasicAuthentication',
         'rest_framework.authentication.TokenAuthentication',
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
         'rest_framework.authentication.SessionAuthentication',
     ),
 
@@ -215,7 +214,7 @@ CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOWED_ORIGINS = [    
     'https://drfpythonwww-icon91.vercel.app',
-    'https://drfpythonwwww-cl25au8ts-icon91.vercel.app'
+    'https://drfpythonwwww-cl25au8ts-icon91.vercel.app',
     'http://localhost:3000',  
 ]
 CORS_ALLOW_METHODS = (

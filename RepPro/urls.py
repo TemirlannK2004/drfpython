@@ -16,13 +16,15 @@ from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,TokenVerifyView
 )
-
+router = DefaultRouter()
+# router.register(r'auth/tutors', CustomTokenObtainPairViewSet, basename='custom_token_obtain_pair')
 
 
 urlpatterns = [
    
     path('admin/', admin.site.urls),
     path('',include('tutors.urls')),
+    path('', include(router.urls)),
     path('auth/',include('djoser.urls')),
     path('auth/', include('djoser.urls.jwt')),
     path('api-auth/', include('rest_framework.urls')),
