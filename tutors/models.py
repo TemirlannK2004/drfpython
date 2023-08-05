@@ -136,7 +136,7 @@ class TutorUser(AbstractBaseUser, PermissionsMixin):
     files = models.FileField('Files',upload_to='fmedia\\files/%Y/%m/%d',null=True, blank=True)
     salary = models.IntegerField('Salary',max_length=200,null=True, blank=True, choices=SALARY_CHOICES)
     link = models.URLField('Video Link',blank=True, null=True)
-    activate_post = models.BooleanField('Acticate Profile',default=False)
+    activate_post = models.BooleanField('Acticate Profile',default=True)
 
     courses = models.ManyToManyField(Courses,through='TutorCourse',validators=[validate_courses])
 
