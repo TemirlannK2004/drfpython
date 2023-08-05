@@ -103,7 +103,7 @@ class UpdateProfileView(generics.RetrieveUpdateDestroyAPIView):
     """Update Profile API"""
     queryset = TutorUser.objects.all()
     serializer_class = UpdateUserSerializer
-    permission_classes =[IsOwnerOrReadOnly,]
+    # permission_classes =[IsOwnerOrReadOnly,]
 
 
 class CustomTokenObtainPairView(TokenObtainPairView):
