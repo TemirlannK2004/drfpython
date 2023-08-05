@@ -228,6 +228,7 @@ CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOWED_ORIGINS = [    
     'https://drfpythonwww-icon91.vercel.app',
+    'https://drfpythonwwww-cl25au8ts-icon91.vercel.app'
     'http://localhost:3000',  
 ]
 CORS_ALLOW_METHODS = (
