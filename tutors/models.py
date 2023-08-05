@@ -267,4 +267,10 @@ class TutorRequest(models.Model):
 
 
 
+class Payment(models.Model):
+    tutor = models.ForeignKey(TutorUser, on_delete=models.CASCADE)
+    cardholder_name = models.CharField(max_length=100)
+    card_number = models.CharField(max_length=16)
+    expiration_date = models.DateField()
+    cvv = models.CharField(max_length=3)
 
