@@ -94,11 +94,21 @@ class TutorsListView(generics.ListAPIView):
     
 
 class UserProfileView(APIView):
+    """Display Tutor Profile """
     permission_classes = [IsAuthenticated]
     def get(self, request):
         user = request.user
         serializer = TutorUserProfile(user)
         return Response(serializer.data)
+
+
+
+class TutorProfilClientView(generics.RetrieveAPIView):
+    """ Display Tutor Profile for Client """
+    queryset = TutorUser.objects.all()
+    serializer_class = TutorUserProfile
+    permission_classes = [IsAuthenticatedOrReadOnly,]
+    lookup_field = 'pk'
 
 
 

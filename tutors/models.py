@@ -132,7 +132,7 @@ class TutorUser(AbstractBaseUser, PermissionsMixin):
     education = models.CharField('Education/University',max_length=255, null=True, blank=True)
     degree = models.CharField('Academic Degree',max_length=255,null=True,blank=True,choices=DEGREE_CHOICES)
     yof = models.IntegerField('Year of Ending ',blank=True, null=True,validators=[positive_validator])
-    avatar = models.ImageField('Profile Avatar',upload_to='tutor_avatars/', default='tutor_avatar_def.png')
+    avatar = models.ImageField('Profile Avatar',upload_to='tutor_avatars/', default='tutor_avatars/tutor_avatar_def.png')
     files = models.FileField('Files',upload_to='fmedia\\files/%Y/%m/%d',null=True, blank=True)
     salary = models.IntegerField('Salary',max_length=200,null=True, blank=True, choices=SALARY_CHOICES)
     link = models.URLField('Video Link',blank=True, null=True)
