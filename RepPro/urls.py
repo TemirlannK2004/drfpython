@@ -33,7 +33,7 @@ urlpatterns = [
     path('signin/tutor/', CustomTokenObtainPairView.as_view(), name='tutor_signin'),
     
     path('tutors/', TutorsListView.as_view(), name='tutors_list'),
-    path('tutor/<int:pk>/', UpdateProfileView.as_view(), name='update_profile'),
+    path('tutor-profile/update/', UpdateProfileView.as_view(), name='update_profile'),
     path('tutor-profile/', UserProfileView.as_view(), name='tutor-profile'),
 
     # path('tutors/<int:pk>/',UserProfileView.as_view(), name='tutor_detail_page'),

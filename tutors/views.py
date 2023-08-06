@@ -99,21 +99,24 @@ class UserProfileView(APIView):
         user = request.user
         serializer = TutorUserProfile(user)
         return Response(serializer.data)
-# @api_view(['GET'])
-# @permission_classes([IsAuthenticated])
-# def view_profile(request):
-#     user = request.user
-#     # Теперь можно получить профиль клиента на основе информации в объекте `user`
-#     # и вернуть его в ответе
-#     return Response({'first_name': user.first_name, 'email': user.email,'degree':user.degree})   
+
 
 
 class UpdateProfileView(generics.RetrieveUpdateDestroyAPIView):
     """Update Profile API"""
-    queryset = TutorUser.objects.all()
     serializer_class = UpdateUserSerializer
-    # permission_classes =[IsOwnerOrReadOnly,]
+    def get_object(self):
+        return self.request.user
 
+    def put(self, request):
+        user = self.get_object()
+        serializer = UpdateUserSerializer(user, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=400)
+    # permission_classes =[IsOwnerOrReadOnly,]
+    
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     """Custom URL for SignIn Tutor JWT"""

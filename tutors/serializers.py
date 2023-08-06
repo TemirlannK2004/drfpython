@@ -92,52 +92,52 @@ class TutorUserProfile(serializers.ModelSerializer):
 
 
 class UpdateUserSerializer(serializers.ModelSerializer):
-    """ Update Tutor Profile """
-    tutor_user_model=TutorUser
-    def getEmail(self, tutor_user_model):
-        return tutor_user_model.email
-    def getFirstName(self, tutor_user_model):
-        return tutor_user_model.first_name
-    def getLastName(self, tutor_user_model):
-        return tutor_user_model.last_name
-    def getPhone(self, tutor_user_model):
-        return tutor_user_model.phone_number
-    def getCourses(self, tutor_user_model):
-        return tutor_user_model.courses
-    
-    email = serializers.SerializerMethodField("getEmail")
-    first_name = serializers.SerializerMethodField("getFirstName")
-    last_name = serializers.SerializerMethodField("getLastName")
-    phone_num = serializers.SerializerMethodField("getPhone")
+        """ Update Tutor Profile """
+        tutor_user_model=TutorUser
+        def getEmail(self, tutor_user_model):
+            return tutor_user_model.email
+        def getFirstName(self, tutor_user_model):
+            return tutor_user_model.first_name
+        def getLastName(self, tutor_user_model):
+            return tutor_user_model.last_name
+        def getPhone(self, tutor_user_model):
+            return tutor_user_model.phone_number
+        def getCourses(self, tutor_user_model):
+            return tutor_user_model.courses
+        
+        email = serializers.SerializerMethodField("getEmail")
+        first_name = serializers.SerializerMethodField("getFirstName")
+        last_name = serializers.SerializerMethodField("getLastName")
+        phone_num = serializers.SerializerMethodField("getPhone")
 
-    courses = serializers.SlugRelatedField(
-        queryset=Courses.objects.all(),
-        many=True,
-        slug_field='name',
-        required=False
-    )
-    class Meta:
-        model = TutorUser
-        fields = ('email','first_name','last_name','phone_num',"avatar",'bio','date_of_birth','experience','education','degree','yof','courses','salary','files','link','activate_post')
-    
-    
-    def update(self, instance, validated_data):
-        courses_data = validated_data.pop('courses', None)
-        for attr, value in validated_data.items():
-            if value is not None and getattr(instance, attr) != value:
-                setattr(instance, attr, value)
-        if courses_data is not None:
-            instance.courses.set(courses_data)
-        instance.save()
-        return instance
+        courses = serializers.SlugRelatedField(
+            queryset=Courses.objects.all(),
+            many=True,
+            slug_field='name',
+            required=False
+        )
+        class Meta:
+            model = TutorUser
+            fields = ('email','first_name','last_name','phone_num',"avatar",'bio','date_of_birth','experience','education','degree','yof','courses','salary','files','link','activate_post')
+        
+        
+        def update(self, instance, validated_data):
+            courses_data = validated_data.pop('courses', None)
+            for attr, value in validated_data.items():
+                if value is not None and getattr(instance, attr) != value:
+                    setattr(instance, attr, value)
+            if courses_data is not None:
+                instance.courses.set(courses_data)
+            instance.save()
+            return instance
 
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        courses = instance.courses.all()
-        course_names = [course.name for course in courses]
-        representation['courses'] = course_names
-        return representation
-    
+        def to_representation(self, instance):
+            representation = super().to_representation(instance)
+            courses = instance.courses.all()
+            course_names = [course.name for course in courses]
+            representation['courses'] = course_names
+            return representation
+        
 
 
 class TutorListSerializer(serializers.ModelSerializer):
