@@ -103,6 +103,7 @@ class UserProfileView(APIView):
 
 
 class UpdateProfileView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAuthenticated]
     """Update Profile API"""
     serializer_class = UpdateUserSerializer
     def get_object(self):
