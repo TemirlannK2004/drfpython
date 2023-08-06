@@ -1,17 +1,11 @@
-FROM python:3.10-alpine
-
+FROM python
 ENV PYTHONUNBUFFERED 1
 ENV PYTHONDONTWRITEBYTECODE 1
 
-WORKDIR /app/rep_pro
+WORKDIR /drfpython/tutors
+COPY /requirements.txt ./
+RUN pip install -r requirements.txt
+COPY . .
 
-COPY requirements.txt /app/rep_pro/
-
-# Build psycopg2-binary from source -- add required required dependencies
-RUN apk add --virtual .build-deps --no-cache postgresql-dev gcc python3-dev musl-dev && \
-        pip install --no-cache-dir -r requirements.txt && \
-        apk --purge del .build-deps
-
-COPY . /app/rep_pro/
-
-CMD [ "python", "manage.py", "runserver", "0.0.0.0:8000" ]
+EXPOSE 8000
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]

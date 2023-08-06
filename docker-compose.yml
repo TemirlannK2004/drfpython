@@ -1,8 +1,24 @@
 version: '3.9'
-
 services:
-  django:
-    image: django-docker:0.0.1
-    build: .
-    ports:
-      - "8000:8000"
+   django:
+       build: .
+       container_name: django
+       volumes:
+         - .:/drfpython/tutors
+       ports:
+           - 5001:8000
+       depends_on:
+         - pgdb
+
+   pgdb:
+     image: postgres
+     environment:
+       - POSTGRES_DB=postgres
+       - POSTGRES_USER=postgres
+       - POSTGRES_PASSWORD=postgres
+     container_name: pgdb
+     volumes:
+       - postgredata:/var/lib/postgresql/data/
+
+volumes:
+  postgredata: null
