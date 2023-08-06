@@ -1,5 +1,6 @@
 
 from django.db.models.functions import Coalesce
+from rest_framework.decorators import api_view,permission_classes
 
 from django_filters.rest_framework import DjangoFilterBackend
 import requests
@@ -21,6 +22,8 @@ from rest_framework.status import *
 from rest_framework.parsers import JSONParser, MultiPartParser, FormParser
 from rest_framework import generics
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework_simplejwt.authentication import JWTAuthentication
+
 from rest_framework_simplejwt.tokens import RefreshToken
 
 class TutorRequisitesView(APIView):
@@ -90,13 +93,19 @@ class TutorsListView(generics.ListAPIView):
         return TutorUser.objects.filter(activate_post=True).annotate(average_rating=Coalesce(Avg('reviews__rating'),0.0)).order_by('-average_rating','pk')
     
 
-class UserProfileView(generics.RetrieveAPIView):
-    """ Display Tutor Profile for Client """
-    queryset = TutorUser.objects.all()
-    serializer_class = TutorUserProfile
-    permission_classes = [IsAuthenticatedOrReadOnly,]
-    lookup_field = 'pk'
-   
+class UserProfileView(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, request):
+        user = request.user
+        serializer = TutorUserProfile(user)
+        return Response(serializer.data)
+# @api_view(['GET'])
+# @permission_classes([IsAuthenticated])
+# def view_profile(request):
+#     user = request.user
+#     # Теперь можно получить профиль клиента на основе информации в объекте `user`
+#     # и вернуть его в ответе
+#     return Response({'first_name': user.first_name, 'email': user.email,'degree':user.degree})   
 
 
 class UpdateProfileView(generics.RetrieveUpdateDestroyAPIView):

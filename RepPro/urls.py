@@ -21,7 +21,7 @@ router = DefaultRouter()
 
 
 urlpatterns = [
-   
+
     path('admin/', admin.site.urls),
     path('',include('tutors.urls')),
     path('', include(router.urls)),
@@ -34,7 +34,9 @@ urlpatterns = [
     
     path('tutors/', TutorsListView.as_view(), name='tutors_list'),
     path('tutor/<int:pk>/', UpdateProfileView.as_view(), name='update_profile'),
-    path('tutors/<int:pk>/',UserProfileView.as_view(), name='tutor_detail_page'),
+    path('tutor-profile/', UserProfileView.as_view(), name='tutor-profile'),
+
+    # path('tutors/<int:pk>/',UserProfileView.as_view(), name='tutor_detail_page'),
     path('tutor/<int:pk>/review/', ReviewCreateView.as_view(), name='review_page'),
     path('tutor_requests/<int:tutor_id>/', TutorRequestView.as_view(), name='tutor_requests'),
     path('tutors/<int:tutor_id>/requisites/', TutorRequisitesView.as_view(),name='tutor_requisites'),
